@@ -29,8 +29,8 @@ const document = SwaggerModule.createDocument(app, options);
 SwaggerModule.setup('api', app, document);
 
   // Iniciar el servidor en el puerto configurado
-  await app.listen(process.env.PORT || 3000);
-  logger.log(`App running on port ${process.env.PORT || 3000}`);
+  await app.listen(process.env.PORT || 3001);
+  logger.log(`App running on port ${process.env.PORT || 3001}`);
 }
 
 bootstrap();
