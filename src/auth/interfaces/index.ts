@@ -1,0 +1,1 @@
+export { JwtPayloadWithSub } from './jwt-payload.interface'

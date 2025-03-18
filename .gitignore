@@ -1,0 +1,49 @@
+/dist
+/node_modules
+/build
+
+
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.env
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Lock files de Yarn o pnpm (si los usas)
+/yarn.lock
+/pnpm-lock.yaml
+
+# Archivos de PM2
+.pm2/
+
+# Sistema de archivos de OS
+.DS_Store
+Thumbs.db
