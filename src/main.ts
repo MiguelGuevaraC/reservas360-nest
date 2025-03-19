@@ -9,11 +9,21 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger("Bootstrap");
 
-  const httpsOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH ),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH ),
-  };
+  // Obtener rutas desde variables de entorno
+  const sslKeyPath = process.env.SSL_KEY_PATH;
+  const sslCertPath = process.env.SSL_CERT_PATH;
+  const sslCaBundlePath = process.env.SSL_CA_BUNDLE_PATH;
 
+  // Log para verificar las rutas de los archivos
+  logger.log(`SSL_KEY_PATH: ${sslKeyPath}`);
+  logger.log(`SSL_CERT_PATH: ${sslCertPath}`);
+  logger.log(`SSL_CA_BUNDLE_PATH: ${sslCaBundlePath}`);
+
+  const httpsOptions = {
+    key: fs.readFileSync(sslKeyPath),
+    cert: fs.readFileSync(sslCertPath),
+    ca: sslCaBundlePath ? fs.readFileSync(sslCaBundlePath) : undefined,
+  };
 
   // Configura el prefijo global para las rutas
   app.setGlobalPrefix("api");
