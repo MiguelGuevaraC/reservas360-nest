@@ -10,9 +10,10 @@ async function bootstrap() {
   const logger = new Logger("Bootstrap");
 
   const httpsOptions = {
-    key: fs.readFileSync(process.env.SSL_KEY_PATH || "./secrets/cert.key"),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH || "./secrets/cert.crt"),
+    key: fs.readFileSync(process.env.SSL_KEY_PATH ),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH ),
   };
+
 
   // Configura el prefijo global para las rutas
   app.setGlobalPrefix("api");
@@ -38,7 +39,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   
-  // Iniciar servidor HTTPS
+  // Iniciar servidor HTTPS con .ca-bundle
   https.createServer(httpsOptions, app.getHttpAdapter().getInstance()).listen(port, () => {
     logger.log(`Servidor HTTPS en https://localhost:${port}`);
   });
