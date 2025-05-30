@@ -1,19 +1,13 @@
-import { Module } from "@nestjs/common";
+// src/seed/seed.module.ts
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { SeedService } from './seed.service';
+import { Person } from '../person/entities/person.entity';
+import { User } from '../user/entities/user.entity';
 
-import { AuthModule } from "./../auth/auth.module";
-
-import { SeedService } from "./seed.service";
-import { SeedController } from "./seed.controller";
-import { TypeOrmModule } from "@nestjs/typeorm";
-
-import { User } from "../auth/entities/user.entity";
-import { Person } from "../auth/entities/person.entity";
 @Module({
-  controllers: [SeedController],
+  imports: [TypeOrmModule.forFeature([Person, User])],
   providers: [SeedService],
-  imports: [
-    AuthModule,
-    TypeOrmModule.forFeature([User, Person]),
-  ],
+  exports: [SeedService],
 })
 export class SeedModule {}

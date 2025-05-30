@@ -7,100 +7,108 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-
 import * as bcrypt from "bcrypt";
 
-import { User } from "./entities/user.entity";
+import { User } from "../user/entities/user.entity";
 import { LoginUserDto, CreateUserDto } from "./dto";
 import { JwtPayloadWithSub } from "./interfaces/jwt-payload.interface";
-
-import { UserResponseDTO } from './dto/user-response.dto';
+import { PersonResponseDTO, UserResponseDTO } from "./dto/user-response.dto";
+import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
     private readonly jwtService: JwtService
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDTO> {
     try {
       const { password, ...userData } = createUserDto;
 
       const user = this.userRepository.create({
         ...userData,
-        password: bcrypt.hashSync(password, 10),
+        password: await bcrypt.hash(password, 10),
       });
 
-      await this.userRepository.save(user);
-      delete user.password;
+      const savedUser = await this.userRepository.save(user);
 
       return {
-        ...user,
-        token: this.getJwtToken({ sub: String(user.id) }), // Convertimos a string aquí también
+        id: savedUser.id,
+        username: savedUser.username,
+        person_id: savedUser.person_id,
+        email: savedUser.email,
+        status: savedUser.status,
+      person: plainToInstance(PersonResponseDTO, user.person), // ✅ transformación aquí
+        token: this.getJwtToken({ sub: String(savedUser.id) }),
       };
-
-      // TODO: Retornar el JWT de acceso
     } catch (error) {
       this.handleDBErrors(error);
     }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto): Promise<UserResponseDTO> {
     const { password, email } = loginUserDto;
-  
-    // Buscar al usuario por correo electrónico
+
     const user = await this.userRepository.findOne({
       where: { email },
-      relations: ['person'],
-      select: ['id', 'email', 'password', 'person', 'person_id'] // Asegúrate de seleccionar los campos necesarios
+      relations: ["person"],
+      select: [
+        "id",
+        "email",
+        "password",
+        "username",
+        "status",
+        "person",
+        "person_id",
+      ],
     });
-  
-    // Si no se encuentra el usuario o la contraseña no coincide
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      throw new UnauthorizedException('Credenciales no son válidas');
+
+    if (!user) {
+      throw new UnauthorizedException("Credenciales no son válidas");
     }
-  
-    // Excluir la contraseña antes de devolver la respuesta
-    const { password: _, ...userWithoutPassword } = user;
-  
-    // Respuesta con el DTO UserResponseDTO
-    const response: UserResponseDTO = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      person_id: user.person_id,
-      status: user.status,
-      person: user.person,
-      token: this.getJwtToken({ sub: user.id }), // Generamos el token correctamente con el sub
-    };
-  
-    return response;
-  }
-  
-  
-  
 
-  async checkAuthStatus(user: User) {
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      throw new UnauthorizedException("Credenciales no son válidas");
+    }
+
     return {
-      ...user,
-      token: this.getJwtToken({ sub: String(user.id) }), // Convertimos a string aquí también
+      id: user.id,
+      username: user.username,
+      person_id: user.person_id,
+      email: user.email,
+      status: user.status,
+      person: plainToInstance(PersonResponseDTO, user.person), // ✅ transformación aquí
+      token: this.getJwtToken({ sub: String(user.id) }),
     };
   }
 
-  private getJwtToken(payload: JwtPayloadWithSub) {
-    
-    const token = this.jwtService.sign(payload);
-    return token;
+  async checkAuthStatus(user: User): Promise<UserResponseDTO> {
+    return {
+      id: user.id,
+      username: user.username,
+      person_id: user.person_id,
+      email: user.email,
+      status: user.status,
+      person: plainToInstance(PersonResponseDTO, user.person), // ✅ transformación aquí
+      token: this.getJwtToken({ sub: String(user.id) }),
+    };
+  }
+
+  private getJwtToken(payload: JwtPayloadWithSub): string {
+    return this.jwtService.sign(payload);
   }
 
   private handleDBErrors(error: any): never {
-    if (error.code === "23505") throw new BadRequestException(error.detail);
+    if (error.code === "23505") {
+      throw new BadRequestException(error.detail);
+    }
 
-    console.log(error);
-
-    throw new InternalServerErrorException("Please check server logs");
+    console.error(error);
+    throw new InternalServerErrorException(
+      "Por favor revise los logs del servidor"
+    );
   }
 }

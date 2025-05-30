@@ -9,6 +9,8 @@ import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
 
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { PersonModule } from './person/person.module';
 
 
 @Module({
@@ -26,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DB_PASSWORD,      
       autoLoadEntities: true,
       synchronize: true,
+      dropSchema: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname,'..','public'), 
@@ -33,6 +36,8 @@ import { AuthModule } from './auth/auth.module';
     CommonModule,
     SeedModule,
     AuthModule,
+    UserModule,
+    PersonModule,
 
   ],
 })

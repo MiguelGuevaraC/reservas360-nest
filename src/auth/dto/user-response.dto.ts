@@ -1,47 +1,46 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 
 export class PersonResponseDTO {
   @Expose()
-  id: number | null;
+  id!: number;
 
   @Expose()
-  documentType: string | null;
+  documentType!: string;
 
   @Expose()
-  documentNumber: string | null;
+  documentNumber!: string;
 
   @Expose()
-  fullName: string | null;
-  
-  // Agrega otros campos de la persona si es necesario
+  fullName!: string;
+
   @Expose()
-  phone?: string | null; // Si el teléfono no está presente, asignar null
-  
+  phone!: string | null;
+
   @Expose()
-  email?: string | null; // Si el correo no está presente, asignar null
+  email!: string | null;
 }
-
 
 export class UserResponseDTO {
   @Expose()
-  id: number | null;
+  id!: number;
 
   @Expose()
-  name: string | null;
+  username!: string;
 
   @Expose()
-  email: string | null;
+  email!: string;
 
   @Expose()
-  status: string | null;
+  status!: string;
 
   @Expose()
-  person_id: number | null;
+  person_id!: number;
 
   @Expose()
-  token: string | null;
+  token!: string;
 
-  // Exponemos la persona utilizando el DTO de PersonResponseDTO
+
   @Expose()
-  person: PersonResponseDTO | null; // Si no hay una persona, asignamos null
+  @Type(() => PersonResponseDTO)
+  person?: PersonResponseDTO | null;
 }
